@@ -1,0 +1,7 @@
+Question: Using Wikipedia, find Ghana's area in square kilometres. If it were shared equally among Ghana's 16 regions, how many square kilometres would each get?
+Model: groq/openai/gpt-oss-20b
+
+--- Step 1 ---
+[model error] BadRequestError: litellm.BadRequestError: GroqException - {"error":{"message":"Parsing failed. The model generated output that could not be parsed. Please adjust your prompt. See 'failed_generation' for more details.","type":"invalid_request_error","code":"output_parse_failed","failed_generation":"We need to find Ghana's area from Wikipedia. Use wiki_lookup. Then compute area / 16. Use calculator."}}
+
+Final answer: Sorry, the model could not be reached. Please try again later.

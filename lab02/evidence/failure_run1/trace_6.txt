@@ -1,0 +1,7 @@
+Question: rice 4 185 oil 3 95 i got 1200 wat remain??
+Model: groq/openai/gpt-oss-20b
+
+--- Step 1 ---
+[model error] BadRequestError: litellm.BadRequestError: GroqException - {"error":{"message":"Tool choice is none, but model called a tool","type":"invalid_request_error","code":"tool_use_failed","failed_generation":"{\"name\": \"calculator\", \"arguments\": {\"id\":\"calculator\",\"input\":\"4*185 + 3*95\"}}"}}
+
+Final answer: Sorry, the model could not be reached. Please try again later.

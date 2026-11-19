@@ -1,0 +1,24 @@
+Question: What is the capital of the Bono East Region? If I send 12 bags of yam there at GHS 240 each, what is the total cost?
+Model: groq/openai/gpt-oss-20b
+
+--- Step 1 ---
+[model made a native tool call; translated to the text protocol]
+Thought: (the model chose this action as a native tool call)
+Action: wiki_lookup
+Action Input: Bono East Region
+Observation: The Bono East region of Ghana is a new region carved out of the Brong Ahafo region. The capital of the new region is Techiman. This creation of this new region was in fulfillment of a promise made by the New Patriotic Party prior to the 2016 Ghana general election. Upon winning the elections, the President, Nana Akuffo Addo created the Ministry of Regional Reorganization to oversee policy formulation and implementation. In all six new regions are to be created from the existing ten regions of Ghana. The other regions are Ahafo, Western North, Savannah, North East, and Oti regions.
+--- Step 2 ---
+[model made a native tool call; translated to the text protocol]
+Thought: (the model chose this action as a native tool call)
+Action: calculator
+Action Input: 12*240
+Observation: 2880
+--- Step 3 ---
+Thought: The capital of the Bono East Region is Techiman.  
+The total cost for 12 bags of yam at GHS 240 each is GHS 2,880.  
+Answer: Techiman, GHS 2,880.  
+Action: finish  
+Action Input: Techiman, GHS 2,880
+
+Final answer: Techiman, GHS 2,880
+Total tokens: 677

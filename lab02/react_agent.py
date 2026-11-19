@@ -9,17 +9,20 @@ Usage:
     python lab02/react_agent.py 3               # run question 3 only
     python lab02/react_agent.py "your question" # run any question (saved as trace_custom.txt)
 """
+import json
 import os
 import re
 import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
+import litellm
 from litellm import completion
 
 from tools import TOOLS
 
 load_dotenv()
+litellm.suppress_debug_info = True  # hide LiteLLM's "Give Feedback" banner on errors
 MODEL = os.getenv("LLM_MODEL")
 EVIDENCE = Path(__file__).parent / "evidence"
 
@@ -37,6 +40,8 @@ Rules:
 - Use wiki_lookup for facts. If the page is not found, say you could not find it; do not guess.
 - If no tool is needed, go straight to finish.
 - Take ONE step at a time and then stop. Never write an Observation yourself; it will be given to you.
+- You do NOT have function calling. Never emit a function or tool call. Choose a tool only by
+  writing its name as plain text on the Action line, in your normal reply.
 
 Use exactly this format on every step:
 Thought: <your reasoning>
@@ -87,12 +92,41 @@ def call_model(messages):
     return text.strip(), tokens
 
 
+def recover_native_call(error):
+    """If Groq rejected a native tool call, rebuild it as Thought/Action/Action Input text.
+
+    Groq's error includes the rejected call as "failed_generation", e.g.
+    {"name": "calculator", "arguments": {"input": "1200-1025"}}. Returns None if
+    there is nothing usable to recover.
+    """
+    msg = str(error)
+    if "tool_use_failed" not in msg:
+        return None
+    try:
+        body = json.loads(msg[msg.index("{"):])          # Groq's JSON error body
+        call = json.loads(body["error"]["failed_generation"])
+        name = call["name"]
+        args = call.get("arguments") or {}
+        if isinstance(args, str):
+            args = json.loads(args)
+    except (ValueError, KeyError, TypeError):
+        return None
+    # The model sometimes nests our own format inside the arguments.
+    name = args.get("Action", name)
+    value = args.get("Action Input")
+    if value is None:
+        value = next((v for k, v in args.items() if k not in ("id", "Thought")), "")
+    thought = args.get("Thought", "(the model chose this action as a native tool call)")
+    return f"Thought: {thought}\nAction: {name}\nAction Input: {value}"
+
+
 # --- Step 4 and 5: the loop -------------------------------------------------------
 def run_agent(question, max_steps=6, verbose=True):
     """Run the ReAct loop. Returns (final_answer, trace_text, total_tokens)."""
     messages = [
         {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": f"Question: {question}"},
+        {"role": "user", "content": f"Question: {question}\n\n"
+                                    "Reply in plain text starting with 'Thought:'. Do not call a function."},
     ]
     trace = [f"Question: {question}", f"Model: {MODEL}", ""]
     total_tokens = 0
@@ -108,11 +142,25 @@ def run_agent(question, max_steps=6, verbose=True):
         # THINK: ask the model for the next Thought + Action.
         try:
             reply, tokens = call_model(messages)
-        except Exception as e:  # rate limit (429), network, bad model name...
-            log(f"[model error] {e.__class__.__name__}: {e}")
-            answer = "Sorry, the model could not be reached. Please try again later."
-            log(f"Final answer: {answer}")
-            return answer, "\n".join(trace), total_tokens
+        except Exception as e:
+            # Failure found in the first run: gpt-oss tries to make a *native* tool
+            # call, and Groq rejects it because we send no tools. The rejected call
+            # is still a valid decision, so translate it into our text protocol.
+            recovered = recover_native_call(e)
+            if recovered:
+                log("[model made a native tool call; translated to the text protocol]")
+                reply, tokens = recovered, 0
+            elif "output_parse_failed" in str(e) or "tool_use_failed" in str(e):
+                # No usable action at all: treat like an unparseable reply.
+                log("[model gave no usable text; asking for the plain-text format]")
+                messages.append({"role": "user", "content": "Observation: " + FORMAT_REMINDER})
+                continue
+            else:
+                # Anything else: rate limit (429), network, bad model name...
+                log(f"[model error] {e.__class__.__name__}: {e}")
+                answer = "Sorry, the model could not be reached. Please try again later."
+                log(f"Final answer: {answer}")
+                return answer, "\n".join(trace), total_tokens
         total_tokens += tokens
         log(reply)
         messages.append({"role": "assistant", "content": reply})

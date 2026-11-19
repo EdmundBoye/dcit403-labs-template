@@ -1,0 +1,10 @@
+Question: Good morning! Can you greet me politely? I am a new trader here.
+Model: groq/openai/gpt-oss-20b
+
+--- Step 1 ---
+Thought: The user just wants a polite greeting. No calculations or wiki lookup needed.  
+Action: finish  
+Action Input: Good morning! Welcome to Makola Market, and I’m glad to have you here as a new trader.
+
+Final answer: Good morning! Welcome to Makola Market, and I’m glad to have you here as a new trader.
+Total tokens: 517

@@ -1,0 +1,22 @@
+Question: rice 4 185 oil 3 95 i got 1200 wat remain??
+Model: groq/openai/gpt-oss-20b
+
+--- Step 1 ---
+[model made a native tool call; translated to the text protocol]
+Thought: (the model chose this action as a native tool call)
+Action: calculator
+Action Input: 4*185 + 3*95
+Observation: 1025
+--- Step 2 ---
+[model made a native tool call; translated to the text protocol]
+Thought: (the model chose this action as a native tool call)
+Action: calculator
+Action Input: 1200-1025
+Observation: 175
+--- Step 3 ---
+Thought: The remaining amount is 175 GHS.
+Action: finish
+Action Input: 175 GHS
+
+Final answer: 175 GHS
+Total tokens: 1003

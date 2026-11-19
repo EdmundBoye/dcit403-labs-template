@@ -1,0 +1,7 @@
+Question: Good morning! Can you greet me politely? I am a new trader here.
+Model: groq/openai/gpt-oss-20b
+
+--- Step 1 ---
+[model error] BadRequestError: litellm.BadRequestError: GroqException - {"error":{"message":"Tool choice is none, but model called a tool","type":"invalid_request_error","code":"tool_use_failed","failed_generation":"{\"name\": \"finish\", \"arguments\": {\"Thought\":\"The user wants a polite greeting. No tools needed.\",\"Action\":\"finish\",\"Action Input\":\"Good morning! Welcome to Makola Market. I'm glad to have you here as a new trader. If you need any help with costing or quick facts, just let me know!\"}}"}}
+
+Final answer: Sorry, the model could not be reached. Please try again later.
